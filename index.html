@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Austrian EV Tax Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        .calculator {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 350px;
+        }
+        h2 {
+            color: #333;
+        }
+        .input-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        .input-group label {
+            margin-right: 10px;
+            font-size: 16px;
+            color: #333;
+            width: 120px;
+            text-align: right;
+        }
+        input[type="number"] {
+            width: 120px;
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .results {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+        .results p {
+            margin: 10px 0;
+        }
+        select {
+            padding: 5px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <select id="language" onchange="changeLanguage()">
+            <option value="en">English</option>
+            <option value="de">Deutsch</option>
+        </select>
+        <h2 id="title">Austrian EV Tax Calculator</h2>
+        <div class="input-group">
+            <label id="powerLabel">Power (kW):</label>
+            <input type="number" id="power" min="0">
+        </div>
+        <div class="input-group">
+            <label id="weightLabel">Weight (kg):</label>
+            <input type="number" id="weight" min="0">
+        </div>
+        <button id="calculateBtn" onclick="calculateTax()">Calculate Tax</button>
+        <div class="results">
+            <p id="yearly">Yearly Tax: €0.00</p>
+            <p id="monthly">Monthly Tax: €0.00</p>
+        </div>
+    </div>
+
+    <script>
+        // Language content
+        const languages = {
+            en: {
+                title: "Austrian EV Tax Calculator",
+                powerLabel: "Power (kW):",
+                weightLabel: "Weight (kg):",
+                calculateBtn: "Calculate Tax",
+                yearly: "Yearly Tax",
+                monthly: "Monthly Tax"
+            },
+            de: {
+                title: "Österreichischer Elektrofahrzeug-Steuerrechner",
+                powerLabel: "Leistung (kW):",
+                weightLabel: "Gewicht (kg):",
+                calculateBtn: "Steuer berechnen",
+                yearly: "Jährliche Steuer",
+                monthly: "Monatliche Steuer"
+            }
+        };
+
+        // Function to update text based on selected language
+        function changeLanguage() {
+            const lang = document.getElementById("language").value;
+            const texts = languages[lang];
+
+            document.getElementById("title").innerText = texts.title;
+            document.getElementById("powerLabel").innerText = texts.powerLabel;
+            document.getElementById("weightLabel").innerText = texts.weightLabel;
+            document.getElementById("calculateBtn").innerText = texts.calculateBtn;
+
+            // Update result labels (without resetting values)
+            const yearlyText = document.getElementById("yearly").innerText.split(":")[1] || " €0.00";
+            const monthlyText = document.getElementById("monthly").innerText.split(":")[1] || " €0.00";
+            document.getElementById("yearly").innerText = `${texts.yearly}: ${yearlyText}`;
+            document.getElementById("monthly").innerText = `${texts.monthly}: ${monthlyText}`;
+        }
+
+        // Tax calculation function
+        function calculateTax() {
+            let power = Number(document.getElementById("power").value);
+            let weight = Number(document.getElementById("weight").value);
+
+            // Power tax calculation
+            let powerTax = 0;
+            let taxablePower = Math.max(0, power - 45);
+            if (taxablePower > 0) {
+                if (taxablePower <= 35) {
+                    powerTax = taxablePower * 0.25;
+                } else if (taxablePower <= 55) {
+                    powerTax = (35 * 0.25) + ((taxablePower - 35) * 0.35);
+                } else {
+                    powerTax = (35 * 0.25) + (20 * 0.35) + ((taxablePower - 55) * 0.45);
+                }
+            }
+
+            // Weight tax calculation
+            let weightTax = 0;
+            let taxableWeight = Math.max(0, weight - 900);
+            if (taxableWeight > 0) {
+                if (taxableWeight <= 500) {
+                    weightTax = taxableWeight * 0.015;
+                } else if (taxableWeight <= 1200) {
+                    weightTax = (500 * 0.015) + ((taxableWeight - 500) * 0.03);
+                } else {
+                    weightTax = (500 * 0.015) + (700 * 0.03) + ((taxableWeight - 1200) * 0.045);
+                }
+            }
+
+            // Total tax
+            let monthlyTax = powerTax + weightTax;
+            let yearlyTax = monthlyTax * 12;
+
+            // Update results based on current language
+            const lang = document.getElementById("language").value;
+            const texts = languages[lang];
+            document.getElementById("yearly").innerText = `${texts.yearly}: €${yearlyTax.toFixed(2)}`;
+            document.getElementById("monthly").innerText = `${texts.monthly}: €${monthlyTax.toFixed(2)}`;
+        }
+
+        // Set initial language to English
+        changeLanguage();
+    </script>
+</body>
+</html>
